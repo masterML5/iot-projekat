@@ -10,12 +10,18 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
@@ -30,30 +36,60 @@ import javax.swing.table.TableRowSorter;
 public class DataPregled extends javax.swing.JPanel {
 
     private static Connection conSQL;
-    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotprojekat?user=test&password=test123";
+    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
     DefaultTableModel tm = new DefaultTableModel();
     UsersPregled up;
+    private static int brojRedova;
+    private static int brojRedovaCheck;
+    private static boolean iteracija = true;
+    int test;
     /**
      * Creates new form DataPregled
      */
+
     public DataPregled() throws SQLException {
         initComponents();
-        try {
-            conSQL = DriverManager.getConnection(connectionUrlMySQL);
-            conSQL.setAutoCommit(false);
-        } catch (SQLException ex) {
-            System.out.println(ex);
-
-        }
+        
         up = new UsersPregled();
+
         getData();
         ArrayList names = up.getNames();
-        for(int i=0; i<names.size(); i++){
-        jComboBox1.addItem((String) names.get(i));
+        for (int i = 0; i < names.size(); i++) {
+            jComboBox1.addItem((String) names.get(i));
         }
-        
-        
-       // puniTabelu();
+
+        listenForUpdates();
+
+        // puniTabelu();
+    }
+
+    private void listenForUpdates() {
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                try (Connection conn = DriverManager.getConnection(connectionUrlMySQL);) {
+                    Statement stmt = conn.createStatement();
+                    ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as broj FROM attendance ");
+                    while (rs.next()) {
+                        brojRedova = rs.getInt("broj");
+                    }
+                    if(iteracija){
+                        brojRedovaCheck = brojRedova;
+                        iteracija = false;
+                    }
+
+                    if (brojRedova > brojRedovaCheck) {
+                        getData();
+                    }
+                    brojRedovaCheck = brojRedova;
+                } catch (SQLException e) {
+                    System.out.println(e);
+                }
+            }
+        };
+        // set the timer to run the task every 5 minutes
+        timer.scheduleAtFixedRate(task, 0, 1000 * 5);
     }
 
     class Podaci {
@@ -65,13 +101,20 @@ public class DataPregled extends javax.swing.JPanel {
     }
 
     private TreeMap getData() throws SQLException {
+        try {
+            conSQL = DriverManager.getConnection(connectionUrlMySQL);
+            conSQL.setAutoCommit(false);
+        } catch (SQLException ex) {
+            System.out.println(ex);
+
+        }
+        tm.setRowCount(0);
+        tm = (DefaultTableModel) jTable1.getModel();
+        System.out.println("BROJ REDOVA pocetak" + tm.getRowCount());
         Podaci p;
         Vector<Podaci> pVec;
-        
-        
-        tm = (DefaultTableModel) jTable1.getModel();
         TreeMap<String, Vector<Podaci>> dataMap = new TreeMap<>();
-        String sql = "SELECT att.user_id, att.clock_in, u.name, u.rfid_uid FROM attendance att JOIN users u ON u.aktivan AND u.vazeci WHERE att.user_id = u.id ORDER BY att.clock_in DESC";
+        String sql = "SELECT att.user_id, att.clock_in, u.name, u.rfid_uid FROM attendance att JOIN users u ON u.vazeci WHERE att.user_id = u.id ORDER BY att.clock_in DESC";
         PreparedStatement pstCheck = conSQL.prepareStatement(sql);
         ResultSet rs = pstCheck.executeQuery();
         while (rs.next()) {
@@ -91,46 +134,52 @@ public class DataPregled extends javax.swing.JPanel {
         }
         rs.close();
         ArrayList<String[]> list;
-        for(String id : dataMap.keySet()){
+        test = 0;
+        for (String id : dataMap.keySet()) {
             pVec = dataMap.get(id);
             list = new ArrayList<>();
-            
-            for(int i =0; i<pVec.size(); i++){
-               p = pVec.get(i);
-              
-               list.add(new String[]{p.user_id, p.rfid_id,p.name,p.check_in.toString()});
-               
-              
+
+            for (int i = 0; i < pVec.size(); i++) {
+                p = pVec.get(i);
+
+                list.add(new String[]{p.user_id, p.rfid_id, p.name, p.check_in.toString()});
+
             }
-            for(String[] data:list) {
+             
+            for (String[] data : list) {
+                test++;
                 tm.addRow(data);
             }
-            
+
         }
-        
+        System.out.println(test);
+        System.out.println(tm.getRowCount() + " BR KRAJ");
+        tm.fireTableDataChanged();
+        jTable1.repaint();
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(tm);
         jTable1.setRowSorter(sorter);
-        
+
         sorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING)));
         sorter.sort();
         return dataMap;
     }
-    public void filter(String query){
+
+    public void filter(String query) {
         TableRowSorter<DefaultTableModel> tr = new TableRowSorter<>(tm);
         jTable1.setRowSorter(tr);
         tr.setRowFilter(RowFilter.regexFilter(query));
-        
+
     }
-    public void filterKorisnik(String queryStatus){
+
+    public void filterKorisnik(String queryStatus) {
         TableRowSorter<DefaultTableModel> tr = new TableRowSorter<>(tm);
         jTable1.setRowSorter(tr);
-        if(!"Bez filtera".equals(queryStatus)){
+        if (!"Bez filtera".equals(queryStatus)) {
             tr.setRowFilter(RowFilter.regexFilter(queryStatus));
-        }else{
+        } else {
             jTable1.setRowSorter(tr);
         }
     }
-    
 
     /**
      * This method is called from within the constructor to initialize the form.

@@ -12,8 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.TreeMap;
 import java.util.Vector;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -22,12 +28,13 @@ import java.util.Vector;
 public class UsersPregled extends javax.swing.JPanel {
 
     private static Connection conSQL;
-    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotprojekat?user=test&password=test123";
+    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+    DefaultTableModel tm;
 
     /**
      * Creates new form UsersPregled
      */
-    public UsersPregled() {
+    public UsersPregled() throws SQLException {
         initComponents();
         try {
             conSQL = DriverManager.getConnection(connectionUrlMySQL);
@@ -36,13 +43,15 @@ public class UsersPregled extends javax.swing.JPanel {
             System.out.println(ex);
 
         }
+        getUsers();
     }
 
     public TreeMap getUsers() throws SQLException {
         Users u;
         Vector<Users> userVec;
+        tm = (DefaultTableModel) jTable1.getModel();
         TreeMap<String, Vector<Users>> usersMap = new TreeMap<>();
-        String sqlCheck = "SELECT * FROM users WHERE aktivan AND vazeci";
+        String sqlCheck = "SELECT * FROM users WHERE vazeci";
         PreparedStatement pstCheck = conSQL.prepareStatement(sqlCheck);
         ResultSet rs = pstCheck.executeQuery();
         while (rs.next()) {
@@ -53,21 +62,53 @@ public class UsersPregled extends javax.swing.JPanel {
                 userVec = new Vector<>();
             }
             u = new Users();
+            u.user_id = rs.getInt("id");
             u.rfid_id = rs.getString("rfid_uid");
             u.name = rs.getString("name");
             u.created = rs.getTimestamp("created");
+            u.aktivan = rs.getBoolean("aktivan");
+
             userVec.add(u);
             usersMap.put(id, userVec);
         }
+        rs.close();
+        ArrayList<String[]> list;
+        String akt = null;
+        for (String id : usersMap.keySet()) {
+            userVec = usersMap.get(id);
+            list = new ArrayList<>();
+
+            for (int i = 0; i < userVec.size(); i++) {
+                u = userVec.get(i);
+                if (u.aktivan) {
+                    akt = "Da";
+                } else {
+                    akt = "Ne";
+                }
+                list.add(new String[]{u.user_id.toString(), u.rfid_id, u.name, u.created.toString(), akt});
+
+            }
+            for (String[] data : list) {
+                tm.addRow(data);
+            }
+
+        }
+
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(tm);
+        jTable1.setRowSorter(sorter);
+
+        sorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(0, SortOrder.ASCENDING)));
+        sorter.sort();
         return usersMap;
     }
-    public ArrayList getNames() throws SQLException{
+
+    public ArrayList getNames() throws SQLException {
         ArrayList<String> names = new ArrayList<>();
-         String sqlCheck = "SELECT name FROM users WHERE aktivan AND vazeci GROUP BY name";
+        String sqlCheck = "SELECT name FROM users WHERE vazeci GROUP BY name";
         PreparedStatement pstCheck = conSQL.prepareStatement(sqlCheck);
         ResultSet rs = pstCheck.executeQuery();
         while (rs.next()) {
-         names.add(rs.getString("name"));
+            names.add(rs.getString("name"));
         }
         rs.close();
         return names;
@@ -75,9 +116,11 @@ public class UsersPregled extends javax.swing.JPanel {
 
     class Users {
 
+        Integer user_id;
         String rfid_id;
         String name;
         Timestamp created;
+        boolean aktivan;
     }
 
     /**
@@ -89,22 +132,57 @@ public class UsersPregled extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+
         setMaximumSize(new java.awt.Dimension(800, 450));
         setMinimumSize(new java.awt.Dimension(800, 450));
         setPreferredSize(new java.awt.Dimension(800, 450));
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "RFID", "Ime", "Datum kreiranja", "Aktivan"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setResizable(false);
+            jTable1.getColumnModel().getColumn(1).setResizable(false);
+            jTable1.getColumnModel().getColumn(2).setResizable(false);
+            jTable1.getColumnModel().getColumn(4).setResizable(false);
+        }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 800, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(338, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 450, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(39, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
 }

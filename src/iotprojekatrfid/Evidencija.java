@@ -22,7 +22,7 @@ import javax.swing.ImageIcon;
  */
 public class Evidencija extends javax.swing.JFrame {
 private static Connection conSQL;
-private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotprojekat?user=test&password=test123";
+private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
     private static int id;
     private UsersPregled up;
     private DataPregled dp;
@@ -206,11 +206,15 @@ private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/
     }//GEN-LAST:event_jMenu2MouseReleased
 
     private void jMenuItemKorisniciActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemKorisniciActionPerformed
+    try {
         up = new UsersPregled();
         jTabbedPane1.add(up, "Korisnici");
         tabbedCount = jTabbedPane1.getTabCount();
         initTabComponent(tabbedCount-1);
         jTabbedPane1.setSelectedIndex(tabbedCount -1);
+    } catch (SQLException ex) {
+        Logger.getLogger(Evidencija.class.getName()).log(Level.SEVERE, null, ex);
+    }
     }//GEN-LAST:event_jMenuItemKorisniciActionPerformed
 
     private void jMenuItemDataMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItemDataMouseReleased
