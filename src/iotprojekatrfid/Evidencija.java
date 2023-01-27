@@ -22,7 +22,8 @@ import javax.swing.ImageIcon;
  */
 public class Evidencija extends javax.swing.JFrame {
 private static Connection conSQL;
-private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+//private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
     private static int id;
     private UsersPregled up;
     private DataPregled dp;
@@ -36,6 +37,7 @@ private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/
 
     /**
      * Creates new form Interface
+     * @throws java.sql.SQLException
      */
     public Evidencija() throws SQLException {
         initComponents();
@@ -46,7 +48,7 @@ private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/
             System.out.println(ex);
 
         }
-        this.username = username;
+        
         LocalDate today = LocalDate.now();
         
         datum = today.toString();
