@@ -11,20 +11,17 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.Vector;
-import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
@@ -40,24 +37,27 @@ import javax.swing.table.TableRowSorter;
 public class DataPregled extends javax.swing.JPanel {
 
     private static Connection conSQL;
-   // private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
-    private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
+    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+    //private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
     DefaultTableModel tm = new DefaultTableModel();
     UsersPregled up;
     private static int brojRedova;
     private static int brojRedovaCheck;
     private static boolean iteracija = true;
-    int test;
+    TableRowSorter<TableModel> sorter;
+
     /**
      * Creates new form DataPregled
+     *
      * @throws java.sql.SQLException
      */
-
-    public DataPregled() throws SQLException {
+    public DataPregled() throws SQLException, InterruptedException {
         initComponents();
         
         up = new UsersPregled();
-
+        tm = (DefaultTableModel) jTable1.getModel();
+        sorter = new TableRowSorter<>(tm);
+        jTable1.setRowSorter(sorter);
         getData();
         lastEnter();
         ArrayList names = up.getNames();
@@ -65,7 +65,7 @@ public class DataPregled extends javax.swing.JPanel {
             jComboBox1.addItem((String) names.get(i));
         }
         TableColumn colid = jTable1.getColumnModel().getColumn(0);
-        colid.setPreferredWidth(20);
+        colid.setPreferredWidth(5);
 
         listenForUpdates();
 
@@ -83,7 +83,7 @@ public class DataPregled extends javax.swing.JPanel {
                     while (rs.next()) {
                         brojRedova = rs.getInt("broj");
                     }
-                    if(iteracija){
+                    if (iteracija) {
                         brojRedovaCheck = brojRedova;
                         iteracija = false;
                     }
@@ -95,10 +95,12 @@ public class DataPregled extends javax.swing.JPanel {
                     brojRedovaCheck = brojRedova;
                 } catch (SQLException e) {
                     System.out.println(e);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(DataPregled.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
-        
+
         timer.scheduleAtFixedRate(task, 0, 1000 * 5);
     }
 
@@ -109,15 +111,18 @@ public class DataPregled extends javax.swing.JPanel {
         String name;
         Timestamp check_in;
     }
-    
+
     class OpstiPodaci {
+
+        String user_id;
         Timestamp check_in;
         String rfid_id;
         String ime;
         String prezime;
         String slika;
     }
-    private void lastEnter() throws SQLException{
+
+    private void lastEnter() throws SQLException {
         try {
             conSQL = DriverManager.getConnection(connectionUrlMySQL);
             conSQL.setAutoCommit(false);
@@ -126,7 +131,7 @@ public class DataPregled extends javax.swing.JPanel {
 
         }
         OpstiPodaci op = null;
-        
+
         String sql = "SELECT att.user_id, att.clock_in, u.name, u.rfid_uid, u.ime, u.prezime, u.slika "
                 + "FROM attendance att JOIN users u ON u.vazeci WHERE att.user_id = u.id ORDER BY att.clock_in DESC LIMIT 1";
         PreparedStatement pstCheck = conSQL.prepareStatement(sql);
@@ -134,28 +139,26 @@ public class DataPregled extends javax.swing.JPanel {
         while (rs.next()) {
             String uid = rs.getString("att.user_id");
             op = new OpstiPodaci();
+            op.user_id = uid;
             op.check_in = rs.getTimestamp("att.clock_in");
             op.ime = rs.getString("u.ime");
             op.prezime = rs.getString("u.prezime");
             op.rfid_id = rs.getString("u.rfid_uid");
             op.slika = rs.getString("u.slika");
-            
-            
+
         }
         rs.close();
         imePrezimeLabel.setText(op.ime + " " + op.prezime);
         brKarticeLabel.setText(op.rfid_id);
         vremePrijaveLabel.setText(op.check_in.toString());
-        
-        ImageIcon icon = new ImageIcon(getClass().getResource("/iotprojekatrfid/res/"+op.slika));
+
+        ImageIcon icon = new ImageIcon(getClass().getResource("/iotprojekatrfid/res/" + op.slika));
         icon.setImage(icon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH));
         slikaLabel.setIcon(icon);
-        
-        
-        
-        
+
     }
-    private TreeMap getData() throws SQLException {
+
+    private void getData() throws SQLException, InterruptedException {
         try {
             conSQL = DriverManager.getConnection(connectionUrlMySQL);
             conSQL.setAutoCommit(false);
@@ -164,8 +167,7 @@ public class DataPregled extends javax.swing.JPanel {
 
         }
         tm.setRowCount(0);
-        tm = (DefaultTableModel) jTable1.getModel();
-        System.out.println("BROJ REDOVA pocetak" + tm.getRowCount());
+
         Podaci p;
         Vector<Podaci> pVec;
         TreeMap<String, Vector<Podaci>> dataMap = new TreeMap<>();
@@ -189,7 +191,7 @@ public class DataPregled extends javax.swing.JPanel {
         }
         rs.close();
         ArrayList<String[]> list;
-        test = 0;
+
         for (String id : dataMap.keySet()) {
             pVec = dataMap.get(id);
             list = new ArrayList<>();
@@ -200,23 +202,19 @@ public class DataPregled extends javax.swing.JPanel {
                 list.add(new String[]{p.user_id, p.rfid_id, p.name, p.check_in.toString()});
 
             }
-             
+
             for (String[] data : list) {
-                test++;
+
                 tm.addRow(data);
             }
 
         }
-        System.out.println(test);
-        System.out.println(tm.getRowCount() + " BR KRAJ");
-        tm.fireTableDataChanged();
-        jTable1.repaint();
-        TableRowSorter<TableModel> sorter = new TableRowSorter<>(tm);
-        jTable1.setRowSorter(sorter);
 
         sorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(3, SortOrder.DESCENDING)));
         sorter.sort();
-        return dataMap;
+
+        // tm.fireTableDataChanged();
+        //jTable1.repaint();
     }
 
     public void filter(String query) {

@@ -16,8 +16,9 @@ public class IOTProjekatRFID {
     /**
      * @param args the command line arguments
      * @throws java.sql.SQLException
+     * @throws java.lang.InterruptedException
      */
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, InterruptedException {
         new Evidencija().setVisible(true);
     }
     
