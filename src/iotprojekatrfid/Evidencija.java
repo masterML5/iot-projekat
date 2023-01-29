@@ -24,12 +24,18 @@ import javax.swing.JOptionPane;
 public class Evidencija extends javax.swing.JFrame {
 
     private static Connection conSQL;
-    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+  //  private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.74.64:3306/iotrfid?user=test&password=test123";
 //private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
     private static int id;
     private UsersPregled up;
     private DataPregled dp;
-
+//    private static String privateKey = "D:\\keys\\milos.ppk";
+    private static String privateKey = "C:\\Users\\pc\\Projects\\keys\\milos.ppk";
+    
+    private static String user = "milos";
+    //private static String host = "192.168.1.6";
+    private static String host = "192.168.74.64";
     private boolean sshCheckBoolean = false;
     private boolean sshSaveUserBoolean = false;
 
@@ -90,11 +96,11 @@ public class Evidencija extends javax.swing.JFrame {
         try {
             // Create a new JSch instance
             JSch jsch = new JSch();
-            String privateKey = "D:\\keys\\milos.ppk";
+          //  String privateKey = "D:\\keys\\milos.ppk";
             jsch.addIdentity(privateKey);
             // Set the username and host of the Raspberry Pi
-            String user = "milos";
-            String host = "192.168.1.6";
+             //user = "milos";
+            // host = "192.168.1.6";
             //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
@@ -129,11 +135,11 @@ public class Evidencija extends javax.swing.JFrame {
         try {
             // Create a new JSch instance
             JSch jsch = new JSch();
-            String privateKey = "D:\\keys\\milos.ppk";
+            
             jsch.addIdentity(privateKey);
             // Set the username and host of the Raspberry Pi
-            String user = "milos";
-            String host = "192.168.1.6";
+           // String user = "milos";
+            //String host = "192.168.1.6";
             //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
@@ -168,11 +174,10 @@ public class Evidencija extends javax.swing.JFrame {
         try {
             // Create a new JSch instance
             JSch jsch = new JSch();
-            String privateKey = "D:\\keys\\milos.ppk";
+           // String privateKey = "D:\\keys\\milos.ppk";
             jsch.addIdentity(privateKey);
             // Set the username and host of the Raspberry Pi
-            String user = "milos";
-            String host = "192.168.1.6";
+            
             //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
@@ -207,11 +212,11 @@ public class Evidencija extends javax.swing.JFrame {
         try {
             // Create a new JSch instance
             JSch jsch = new JSch();
-            String privateKey = "D:\\keys\\milos.ppk";
+            //String privateKey = "D:\\keys\\milos.ppk";
             jsch.addIdentity(privateKey);
             // Set the username and host of the Raspberry Pi
-            String user = "milos";
-            String host = "192.168.1.6";
+            //String user = "milos";
+            //String host = "192.168.1.6";
             //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");

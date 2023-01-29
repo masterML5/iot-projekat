@@ -38,7 +38,8 @@ import javax.swing.table.TableRowSorter;
 public class UsersPregled extends javax.swing.JPanel {
 
     private static Connection conSQL;
-    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.74.64:3306/iotrfid?user=test&password=test123";
+    //private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
     // private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
     DefaultTableModel tm;
 
