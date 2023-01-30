@@ -9,6 +9,11 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,13 +24,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -38,16 +48,22 @@ import javax.swing.table.TableRowSorter;
 public class UsersPregled extends javax.swing.JPanel {
 
     private static Connection conSQL;
-    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.74.64:3306/iotrfid?user=test&password=test123";
+    //private static final String connectionUrlMySQL = "jdbc:mysql://192.168.74.64:3306/iotrfid?user=test&password=test123";
     //private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
-    // private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
+    private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
+    private static boolean izmenaSlika = false;
+    private static String path;
+    private static String destination;
+    private static String nameSlika;
     DefaultTableModel tm;
 
     /**
      * Creates new form UsersPregled
+     * @throws java.sql.SQLException
      */
     public UsersPregled() throws SQLException {
         initComponents();
+        tm = (DefaultTableModel) jTable1.getModel();
         TableColumn colid = jTable1.getColumnModel().getColumn(0);
         TableColumn coldatum = jTable1.getColumnModel().getColumn(3);
         TableColumn colaktivan = jTable1.getColumnModel().getColumn(4);
@@ -66,6 +82,7 @@ public class UsersPregled extends javax.swing.JPanel {
 
         jTable1.addMouseListener(new MouseAdapter() {
 
+            @Override
             public void mouseClicked(MouseEvent me) {
                 if (SwingUtilities.isRightMouseButton(me)) {
                     pop.show(me.getComponent(), me.getX(), me.getY());
@@ -98,13 +115,22 @@ public class UsersPregled extends javax.swing.JPanel {
         ImageIcon icon = new ImageIcon(getClass().getResource("/iotprojekatrfid/res/" + ui.slika));
         icon.setImage(icon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH));
         slikaLabel.setIcon(icon);
+        jLabel6.setText(ui.slika);
 
     }
 
-    public TreeMap getUsers() throws SQLException {
+    public void getUsers() throws SQLException {
+        try {
+            conSQL = DriverManager.getConnection(connectionUrlMySQL);
+            conSQL.setAutoCommit(false);
+        } catch (SQLException ex) {
+            System.out.println(ex);
+
+        }
+        tm.setRowCount(0);
         Users u;
         Vector<Users> userVec;
-        tm = (DefaultTableModel) jTable1.getModel();
+      
         TreeMap<String, Vector<Users>> usersMap = new TreeMap<>();
         String sqlCheck = "SELECT * FROM users WHERE vazeci";
         PreparedStatement pstCheck = conSQL.prepareStatement(sqlCheck);
@@ -154,7 +180,7 @@ public class UsersPregled extends javax.swing.JPanel {
 
         sorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(0, SortOrder.ASCENDING)));
         sorter.sort();
-        return usersMap;
+        
     }
 
     public ArrayList getNames() throws SQLException {
@@ -213,6 +239,44 @@ public class UsersPregled extends javax.swing.JPanel {
         }
     }
 
+    private void insertImage(String path, String destination) {
+        try {
+
+            FileChannel source = new FileInputStream(path).getChannel();
+            FileChannel dest = new FileOutputStream(destination).getChannel();
+            dest.transferFrom(source, 0, source.size());
+
+            source.close();
+            dest.close();
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+    
+    private void editUserData(UserIzmena uiedit) throws SQLException{
+        
+      //  String sql = String.format("UPDATE users SET ime = '%s', prezime = '%s', slika = '%s', aktivan = %b, edited = NOW() WHERE"
+       //         + "  rfid_uid = '%s'", uiedit.ime,uiedit.prezime,uiedit.slika,uiedit.aktivan,uiedit.brojkartice);
+        String sqlUpdate = "UPDATE users SET ime = ?, prezime = ?, slika = ?, aktivan = ?, edited = NOW() WHERE rfid_uid = ? AND vazeci";
+        PreparedStatement statement = conSQL.prepareStatement(sqlUpdate);
+        statement.setString(1, uiedit.ime);
+        statement.setString(2, uiedit.prezime);
+        statement.setString(3, uiedit.slika);
+        statement.setBoolean(4, uiedit.aktivan);
+        statement.setString(5, uiedit.brojkartice);
+        int rows = statement.executeUpdate();
+        if(rows > 0){
+            JOptionPane.showMessageDialog(null,"Uspesno ste izmenili korisnika","Izmena",JOptionPane.INFORMATION_MESSAGE);
+            conSQL.commit();
+            getUsers();
+        }else{
+            JOptionPane.showMessageDialog(null,"Doslo je do greske, podaci nisu izmenjeni","Greska",JOptionPane.ERROR_MESSAGE);
+        }
+        
+        
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -241,6 +305,7 @@ public class UsersPregled extends javax.swing.JPanel {
         jLabel7 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         drLabel = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         setMaximumSize(new java.awt.Dimension(800, 450));
         setMinimumSize(new java.awt.Dimension(800, 450));
@@ -276,35 +341,37 @@ public class UsersPregled extends javax.swing.JPanel {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel2.setText("Broj kartice :");
 
-        bkLabel.setText("jLabel3");
-
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel4.setText("Ime :");
 
-        imeField.setText("jTextField1");
-
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel5.setText("Prezime :");
-
-        prezimeField.setText("jTextField2");
 
         aktivanCB.setText("Aktivan");
 
         jButton1.setBackground(new java.awt.Color(204, 255, 204));
         jButton1.setText("Izmeni podatke");
+        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jButton1MouseReleased(evt);
+            }
+        });
 
         jButton2.setBackground(new java.awt.Color(255, 204, 204));
         jButton2.setText("Poništi");
 
         jButton3.setBackground(new java.awt.Color(153, 153, 255));
         jButton3.setText("Izmeni sliku");
+        jButton3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jButton3MouseReleased(evt);
+            }
+        });
 
         jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel7.setText("Slika :");
 
         jLabel3.setText("Datum registracije :");
-
-        drLabel.setText("jLabel8");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -324,9 +391,7 @@ public class UsersPregled extends javax.swing.JPanel {
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(bkLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(drLabel)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                            .addComponent(drLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addGap(62, 62, 62))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
@@ -346,10 +411,11 @@ public class UsersPregled extends javax.swing.JPanel {
                                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jButton3)
                                     .addComponent(imeField)
                                     .addComponent(prezimeField)
-                                    .addComponent(slikaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(slikaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(0, 0, Short.MAX_VALUE))))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -357,7 +423,12 @@ public class UsersPregled extends javax.swing.JPanel {
                                         .addComponent(jButton1)
                                         .addGap(18, 18, 18)
                                         .addComponent(jButton2))
-                                    .addComponent(aktivanCB))
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                            .addComponent(jButton3)
+                                            .addGap(33, 33, 33)
+                                            .addComponent(aktivanCB))))
                                 .addGap(34, 34, 34)))
                         .addGap(50, 50, 50))))
         );
@@ -371,9 +442,9 @@ public class UsersPregled extends javax.swing.JPanel {
                     .addComponent(jLabel2)
                     .addComponent(bkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(7, 7, 7)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(drLabel))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(drLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -385,20 +456,20 @@ public class UsersPregled extends javax.swing.JPanel {
                     .addComponent(prezimeField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(aktivanCB)
-                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(aktivanCB)
+                    .addComponent(jButton3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 13, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(slikaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel7)
+                    .addComponent(slikaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -415,13 +486,60 @@ public class UsersPregled extends javax.swing.JPanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(33, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton3MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseReleased
+        JFileChooser fc = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
+        fc.setFileFilter(filter);
+        int result = fc.showOpenDialog(null);
+
+        if (result != JFileChooser.APPROVE_OPTION) {
+            JOptionPane.showMessageDialog(null, "Prekid", "Prekid", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        path = fc.getSelectedFile().getAbsolutePath();
+        nameSlika = fc.getSelectedFile().getName();
+
+        File folder = new File(System.getProperty("user.dir") + "/src/iotprojekatrfid/res/");
+
+        destination = folder + File.separator + nameSlika;
+        
+        izmenaSlika = true;
+        jLabel6.setText(nameSlika);
+        
+    }//GEN-LAST:event_jButton3MouseReleased
+
+    private void jButton1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseReleased
+       
+        if(!bkLabel.equals("")){
+        try {
+            UserIzmena uiedit = new UserIzmena();
+            uiedit.aktivan = aktivanCB.isSelected();
+            uiedit.ime = imeField.getText();
+            uiedit.prezime = prezimeField.getText();
+            if(izmenaSlika){
+            uiedit.slika = nameSlika;
+            insertImage(path,destination);
+            }else{
+            uiedit.slika = jLabel6.getText();
+            }
+            uiedit.brojkartice = bkLabel.getText();
+            editUserData(uiedit);
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
+        }else{
+            JOptionPane.showMessageDialog(null,"Niste izabrali korisnika","Greska",JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton1MouseReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox aktivanCB;
@@ -436,6 +554,7 @@ public class UsersPregled extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;

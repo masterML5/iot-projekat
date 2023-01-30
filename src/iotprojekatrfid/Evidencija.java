@@ -24,14 +24,14 @@ import javax.swing.JOptionPane;
 public class Evidencija extends javax.swing.JFrame {
 
     private static Connection conSQL;
-  //  private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
-    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.74.64:3306/iotrfid?user=test&password=test123";
-//private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
+   //  private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+  //  private static final String connectionUrlMySQL = "jdbc:mysql://192.168.74.64:3306/iotrfid?user=test&password=test123";
+private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
     private static int id;
     private UsersPregled up;
     private DataPregled dp;
 //    private static String privateKey = "D:\\keys\\milos.ppk";
-    private static String privateKey = "C:\\Users\\pc\\Projects\\keys\\milos.ppk";
+    //private static String privateKey = "C:\\Users\\pc\\Projects\\keys\\milos.ppk";
     
     private static String user = "milos";
     //private static String host = "192.168.1.6";
@@ -97,7 +97,7 @@ public class Evidencija extends javax.swing.JFrame {
             // Create a new JSch instance
             JSch jsch = new JSch();
           //  String privateKey = "D:\\keys\\milos.ppk";
-            jsch.addIdentity(privateKey);
+            //jsch.addIdentity(privateKey);
             // Set the username and host of the Raspberry Pi
              //user = "milos";
             // host = "192.168.1.6";
@@ -136,7 +136,7 @@ public class Evidencija extends javax.swing.JFrame {
             // Create a new JSch instance
             JSch jsch = new JSch();
             
-            jsch.addIdentity(privateKey);
+            //jsch.addIdentity(privateKey);
             // Set the username and host of the Raspberry Pi
            // String user = "milos";
             //String host = "192.168.1.6";
@@ -175,7 +175,7 @@ public class Evidencija extends javax.swing.JFrame {
             // Create a new JSch instance
             JSch jsch = new JSch();
            // String privateKey = "D:\\keys\\milos.ppk";
-            jsch.addIdentity(privateKey);
+            //jsch.addIdentity(privateKey);
             // Set the username and host of the Raspberry Pi
             
             //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
@@ -213,7 +213,7 @@ public class Evidencija extends javax.swing.JFrame {
             // Create a new JSch instance
             JSch jsch = new JSch();
             //String privateKey = "D:\\keys\\milos.ppk";
-            jsch.addIdentity(privateKey);
+           // jsch.addIdentity(privateKey);
             // Set the username and host of the Raspberry Pi
             //String user = "milos";
             //String host = "192.168.1.6";
@@ -260,7 +260,6 @@ public class Evidencija extends javax.swing.JFrame {
         dateLabel = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         naslovLabel = new javax.swing.JLabel();
-        infoLabel = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -271,32 +270,35 @@ public class Evidencija extends javax.swing.JFrame {
         jMenuItemData = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMaximumSize(new java.awt.Dimension(820, 560));
         setResizable(false);
 
+        dateLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         dateLabel.setText("0000-00-00");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(771, Short.MAX_VALUE)
-                .addComponent(dateLabel))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(dateLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(dateLabel)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(dateLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 3, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
         jTabbedPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jTabbedPane1.setPreferredSize(new java.awt.Dimension(842, 495));
+        jTabbedPane1.setMaximumSize(new java.awt.Dimension(800, 450));
+        jTabbedPane1.setPreferredSize(new java.awt.Dimension(800, 450));
 
         naslovLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         naslovLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         naslovLabel.setText("IOT Projekat Raspberry Pi 4 + MFRC522");
-
-        infoLabel.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
 
         jButton1.setText("jButton1");
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -355,21 +357,17 @@ public class Evidencija extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 847, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(infoLabel)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addContainerGap(14, Short.MAX_VALUE)
                         .addComponent(jButton1)
                         .addGap(33, 33, 33)
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(naslovLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 616, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(naslovLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 616, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -381,11 +379,9 @@ public class Evidencija extends javax.swing.JFrame {
                     .addComponent(jButton1)
                     .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 523, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(infoLabel)
                 .addContainerGap())
         );
 
@@ -527,7 +523,6 @@ public class Evidencija extends javax.swing.JFrame {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel dateLabel;
-    private javax.swing.JLabel infoLabel;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JMenu jMenu1;
