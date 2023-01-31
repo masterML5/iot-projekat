@@ -24,9 +24,9 @@ import javax.swing.JOptionPane;
 public class Evidencija extends javax.swing.JFrame {
 
     private static Connection conSQL;
-    private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
+   // private static final String connectionUrlMySQL = "jdbc:mysql://192.168.1.6:3306/iotrfid?user=test&password=test123";
   //  private static final String connectionUrlMySQL = "jdbc:mysql://192.168.74.64:3306/iotrfid?user=test&password=test123";
-  //private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
+  private static final String connectionUrlMySQL = "jdbc:mysql://localhost:3306/iotrfid?user=root&password=";
     private static int id;
     private UsersPregled up;
     private DataPregled dp;
@@ -47,6 +47,7 @@ public class Evidencija extends javax.swing.JFrame {
      * Creates new form Interface
      *
      * @throws java.sql.SQLException
+     * @throws java.lang.InterruptedException
      */
     public Evidencija() throws SQLException, InterruptedException {
         initComponents();
