@@ -254,6 +254,17 @@ public class UsersPregled extends javax.swing.JPanel {
         }
     }
     
+    private void resetData(){
+        aktivanCB.setSelected(false);
+        bkLabel.setText("");
+        imeField.setText("");
+        prezimeField.setText("");
+        drLabel.setText("");
+   
+        slikaLabel.setIcon(null);
+        jLabel6.setText("");
+    }
+    
     private void editUserData(UserIzmena uiedit) throws SQLException{
         
       //  String sql = String.format("UPDATE users SET ime = '%s', prezime = '%s', slika = '%s', aktivan = %b, edited = NOW() WHERE"
@@ -359,6 +370,11 @@ public class UsersPregled extends javax.swing.JPanel {
 
         jButton2.setBackground(new java.awt.Color(255, 204, 204));
         jButton2.setText("Poništi");
+        jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jButton2MouseReleased(evt);
+            }
+        });
 
         jButton3.setBackground(new java.awt.Color(153, 153, 255));
         jButton3.setText("Izmeni sliku");
@@ -518,8 +534,10 @@ public class UsersPregled extends javax.swing.JPanel {
     }//GEN-LAST:event_jButton3MouseReleased
 
     private void jButton1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseReleased
-       
-        if(!bkLabel.equals("")){
+        System.out.println(bkLabel.getText());
+        int broj = bkLabel.getText().length();
+        System.out.println(broj);
+        if(!bkLabel.getText().isEmpty() && bkLabel.getText().length() != 0){
         try {
             UserIzmena uiedit = new UserIzmena();
             uiedit.aktivan = aktivanCB.isSelected();
@@ -540,6 +558,10 @@ public class UsersPregled extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null,"Niste izabrali korisnika","Greska",JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButton1MouseReleased
+
+    private void jButton2MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseReleased
+        resetData();
+    }//GEN-LAST:event_jButton2MouseReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox aktivanCB;
