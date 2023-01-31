@@ -97,12 +97,9 @@ public class Evidencija extends javax.swing.JFrame {
         try {
             // Create a new JSch instance
             JSch jsch = new JSch();
-          //  String privateKey = "D:\\keys\\milos.ppk";
+          
             jsch.addIdentity(privateKey);
-            // Set the username and host of the Raspberry Pi
-             //user = "milos";
-            // host = "192.168.1.6";
-            //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
+
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
             config.put("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
@@ -116,9 +113,6 @@ public class Evidencija extends javax.swing.JFrame {
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
 
-            //Upload the python file
-            //  sftpChannel.put("path/to/local/file.py", "path/to/remote/file.py");
-            // Execute the Python script on the Raspberry Pi
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
             execChannel.setCommand("python /home/milos/iotprojekat/check.py");
             execChannel.connect();
@@ -138,10 +132,7 @@ public class Evidencija extends javax.swing.JFrame {
             JSch jsch = new JSch();
             
             jsch.addIdentity(privateKey);
-            // Set the username and host of the Raspberry Pi
-           // String user = "milos";
-            //String host = "192.168.1.6";
-            //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
+            
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
             config.put("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
@@ -155,9 +146,7 @@ public class Evidencija extends javax.swing.JFrame {
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
 
-            //Upload the python file
-            //  sftpChannel.put("path/to/local/file.py", "path/to/remote/file.py");
-            // Execute the Python script on the Raspberry Pi
+           
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
             execChannel.setCommand("pkill -9 -f check.py");
             execChannel.connect();
@@ -175,11 +164,9 @@ public class Evidencija extends javax.swing.JFrame {
         try {
             // Create a new JSch instance
             JSch jsch = new JSch();
-           // String privateKey = "D:\\keys\\milos.ppk";
+          
             jsch.addIdentity(privateKey);
-            // Set the username and host of the Raspberry Pi
-            
-            //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
+           
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
             config.put("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
@@ -193,9 +180,7 @@ public class Evidencija extends javax.swing.JFrame {
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
 
-            //Upload the python file
-            //  sftpChannel.put("path/to/local/file.py", "path/to/remote/file.py");
-            // Execute the Python script on the Raspberry Pi
+           
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
             execChannel.setCommand("python /home/milos/iotprojekat/save_user.py");
             execChannel.connect();
@@ -215,10 +200,7 @@ public class Evidencija extends javax.swing.JFrame {
             JSch jsch = new JSch();
             //String privateKey = "D:\\keys\\milos.ppk";
             jsch.addIdentity(privateKey);
-            // Set the username and host of the Raspberry Pi
-            //String user = "milos";
-            //String host = "192.168.1.6";
-            //jsch.setConfig("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
+            
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
             config.put("cipher.s2c", "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
@@ -232,9 +214,7 @@ public class Evidencija extends javax.swing.JFrame {
             channel.connect();
             ChannelSftp sftpChannel = (ChannelSftp) channel;
 
-            //Upload the python file
-            //  sftpChannel.put("path/to/local/file.py", "path/to/remote/file.py");
-            // Execute the Python script on the Raspberry Pi
+           
             ChannelExec execChannel = (ChannelExec) session.openChannel("exec");
             execChannel.setCommand("pkill -9 -f save_user.py");
             execChannel.connect();
